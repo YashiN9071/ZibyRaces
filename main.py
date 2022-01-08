@@ -22,6 +22,18 @@ class PlayerCar(pygame.sprite.Sprite):
             self.rect.left += 300
             self.for_move += 1
 
+    def game_over(self):
+        pass
+
+
+# obstacles
+class Obstacle:
+    def __init__(self):
+        pass
+
+    def move(self):
+        pass
+
 
 # game
 size = WIDTH, HEIGHT = 1920, 1080
@@ -31,6 +43,15 @@ all_sprites = pygame.sprite.Group()
 player_sprite = pygame.sprite.Group()
 obstacle_sprite = pygame.sprite.Group()
 not_an_object_sprite = pygame.sprite.Group()
+
+# environment
+for pos in range(505, 1406, 300):
+    environment_image = pygame.Surface((10, HEIGHT))
+    environment_image.fill(pygame.Color('White'))
+    environment = pygame.sprite.Sprite(not_an_object_sprite)
+    environment.image = environment_image
+    environment.rect = environment_image.get_rect()
+    environment.rect.left += pos
 
 player = PlayerCar()
 player_sprite.add(player)
@@ -45,7 +66,9 @@ while running:
         if event.type == pygame.KEYDOWN:
             player.move(event.key)
     screen.fill(pygame.Color("black"))
+    not_an_object_sprite.update()
     player_sprite.update()
+    not_an_object_sprite.draw(screen)
     player_sprite.draw(screen)
     pygame.display.flip()
     clock.tick(fps)
