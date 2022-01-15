@@ -2,14 +2,14 @@ import sys
 import pygame
 import random
 
-from image_load import load_image
+# from image_load import load_image
 
 pygame.init()
 
 size = WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode(size)
 
-fps = 60
+fps = 100
 clock = pygame.time.Clock()
 
 
@@ -170,7 +170,7 @@ while run:
     text_coord = 0
     f = pygame.font.SysFont('arial', 250)
     for line in intro_text:
-        string_rendered = f.render(line, 1, pygame.Color('white'))
+        string_rendered = f.render(line, True, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
         f = pygame.font.SysFont('arial', 30)
         text_coord += 10
@@ -205,7 +205,7 @@ while run:
         environment.rect.left += pos
 
     f = pygame.font.SysFont('arial', 30)
-    string_rendered = f.render("To move use keys: 'A' and 'D'", 1, pygame.Color('white'))
+    string_rendered = f.render("To move use keys: 'A' and 'D'", True, pygame.Color('white'))
     hint_rect = string_rendered.get_rect()
     hint_rect.center = (180, 1040)
     screen.blit(string_rendered, hint_rect)
@@ -245,7 +245,7 @@ while run:
 
         # screen update
         screen.fill(pygame.Color("black"))
-        score_text = font.render('Your score: ' + str(score), 5, (255, 255, 255))
+        score_text = font.render('Your score: ' + str(score), True, (255, 255, 255))
         screen.blit(score_text, (20, 10))
         screen.blit(string_rendered, hint_rect)
         not_an_object_sprite.update()
@@ -264,6 +264,19 @@ while run:
     if not run:
         break
 
+    with open('score.txt') as file:
+        b = file.readlines()
+        k = b[-1].split()[0]
+        print(k)
+        k = int(k)
+        k += 1
+        print(k)
+
+    with open('score.txt', 'w') as file:
+        for i in b:
+            print(i, file=file, end='')
+        print(f'{k} game: {score}', file=file)
+
     # end game
     intro_text = ['Game Over', ' ', f'Your result: {score}', ' ', 'press any key to go back to start screen']
 
@@ -272,7 +285,7 @@ while run:
     text_coord = 0
     f = pygame.font.SysFont('arial', 200)
     for line in intro_text:
-        string_rendered = f.render(line, 1, pygame.Color('white'))
+        string_rendered = f.render(line, True, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
         f = pygame.font.SysFont('arial', 30)
         text_coord += 10
