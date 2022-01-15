@@ -1,6 +1,5 @@
 import sys
 import pygame
-import pygame_menu
 import random
 
 from image_load import load_image
@@ -122,12 +121,15 @@ class SmallObstacle(pygame.sprite.Sprite):
 
 
 # functions
+def menu_button(text, coords):
+    pass
+
+
 def obstacle_check(p_rect):
     for obstacle in obstacles_sprite:
         if p_rect.colliderect(obstacle.rect):
             obstacle.kill()
-            pygame.quit()
-            sys.exit()
+            return True
 
 
 def random_obstacle():
@@ -149,7 +151,18 @@ def terminate():
     sys.exit()
 
 
-def start_screen():
+# game
+font = pygame.font.SysFont('arial', 50)
+
+player_sprite = pygame.sprite.Group()
+obstacles_sprite = pygame.sprite.Group()
+not_an_object_sprite = pygame.sprite.Group()
+buttons_sprite = pygame.sprite.Group()
+
+
+run = True
+while run:
+    # start game
     intro_text = ['Ziby Races', ' ', 'press any key to continue']
 
     fon = pygame.transform.scale(pygame.Surface(size), (WIDTH, HEIGHT))
@@ -166,45 +179,21 @@ def start_screen():
         text_coord += 200
         screen.blit(string_rendered, intro_rect)
 
-    while True:
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    run = False
+                running = False
         pygame.display.flip()
         clock.tick(fps)
 
-
-def set_difficulty(value, difficulty):
-    pass
-
-
-def start_the_game():
-    return False
-
-
-# game
-font = pygame.font.SysFont('arial', 50)
-
-player_sprite = pygame.sprite.Group()
-obstacles_sprite = pygame.sprite.Group()
-not_an_object_sprite = pygame.sprite.Group()
-
-start_screen()
-
-run = True
-while run:
-    # menu
-    running = True
-    while running:
-        menu = pygame_menu.Menu('Welcome', 400, 300, theme=pygame_menu.themes.THEME_BLUE)
-
-        menu.add.text_input('Name :', default='John Doe')
-        menu.add.selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-        menu.add.button('Play', start_the_game)
-        menu.add.button('Quit', pygame_menu.events.EXIT)
+    if not run:
+        break
 
     # environment
     for pos in range(510, 1411, 300):
@@ -214,6 +203,12 @@ while run:
         environment.image = environment_image
         environment.rect = environment_image.get_rect()
         environment.rect.left += pos
+
+    f = pygame.font.SysFont('arial', 30)
+    string_rendered = f.render("To move use keys: 'A' and 'D'", 1, pygame.Color('white'))
+    hint_rect = string_rendered.get_rect()
+    hint_rect.center = (180, 1040)
+    screen.blit(string_rendered, hint_rect)
 
     player = PlayerCar()
     player_sprite.add(player)
@@ -229,9 +224,9 @@ while run:
                 running = False
             if event.type == pygame.KEYDOWN:
                 player.move(event.key)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    score += 100000
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    run = False
 
         # create obstacles
         if tps >= 250:
@@ -241,16 +236,18 @@ while run:
         # check score
         if score >= 100000:
             running = False
-            run = False
 
         # check intersection
         player_rect = player.rect_check()
-        obstacle_check(player_rect)
+        a = obstacle_check(player_rect)
+        if a:
+            running = False
 
         # screen update
         screen.fill(pygame.Color("black"))
         score_text = font.render('Your score: ' + str(score), 5, (255, 255, 255))
         screen.blit(score_text, (20, 10))
+        screen.blit(string_rendered, hint_rect)
         not_an_object_sprite.update()
         obstacles_sprite.update()
         player_sprite.update()
@@ -263,5 +260,38 @@ while run:
         clock.tick(fps)
         score += 1
         tps += 1
+
+    if not run:
+        break
+
+    # end game
+    intro_text = ['Game Over', ' ', f'Your result: {score}', ' ', 'press any key to go back to start screen']
+
+    fon = pygame.transform.scale(pygame.Surface(size), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    text_coord = 0
+    f = pygame.font.SysFont('arial', 200)
+    for line in intro_text:
+        string_rendered = f.render(line, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        f = pygame.font.SysFont('arial', 30)
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.center = (WIDTH // 2, HEIGHT // 2 + text_coord)
+        text_coord += 50
+        screen.blit(string_rendered, intro_rect)
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    run = False
+                running = False
+        pygame.display.flip()
+        clock.tick(fps)
 
 pygame.quit()
